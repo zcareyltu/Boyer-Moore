@@ -23,8 +23,11 @@ bool OpenFile(std::string& textResult) {
 }
 
 void Benchmark(const std::string& file, const std::string& keyword, StringSearchAlgorithm* algorithm) {
+    const uint8_t* text = (const uint8_t*)file.c_str();
+    const uint8_t* pattern = (const uint8_t*)keyword.c_str();
+
     auto start = std::chrono::steady_clock::now();
-    int count = algorithm->search(file, keyword);
+    int count = algorithm->search(text, file.length(), pattern, keyword.length());
     auto diff = std::chrono::steady_clock::now() - start;
     
     std::cout << "Algorithm: " << algorithm->getName() << std::endl;
@@ -38,7 +41,6 @@ void Benchmark(const std::string& file, const std::string& keyword, StringSearch
 int main()
 {
     std::string keyword = KEYWORD;
-    //FileIterator file(TEXT_FILE);
     std::string file;
     if (!OpenFile(file)) {
         std::cout << "Unable to open file." << std::endl;
