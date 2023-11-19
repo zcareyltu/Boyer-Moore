@@ -2,10 +2,11 @@
 #include <fstream>
 #include <string>
 #include <streambuf>
+#include <chrono>
 
 #define KEYWORD "the"
-#define TEXT_FILE "HuckleberryFinn.txt"
-#define IGNORE_CASE true
+//#define TEXT_FILE "HuckleberryFinn.txt"
+#define TEXT_FILE "InSearchOfLostTime.txt"
 
 #include "StringSearchAlgorithm.h"
 #include "SimpleSearch.h"
@@ -22,10 +23,13 @@ bool OpenFile(std::string& textResult) {
 }
 
 void Benchmark(const std::string& file, const std::string& keyword, StringSearchAlgorithm* algorithm) {
+    auto start = std::chrono::steady_clock::now();
     int count = algorithm->search(file, keyword);
+    auto diff = std::chrono::steady_clock::now() - start;
     
     std::cout << "Algorithm: " << algorithm->getName() << std::endl;
     std::cout << "Found \'" << keyword << "\' " << count << " times." << std::endl;
+    std::cout << "Execution time: " << std::chrono::duration<double, std::milli>(diff).count() << " ms" << std::endl;
     std::cout << std::endl;
 
     delete algorithm;

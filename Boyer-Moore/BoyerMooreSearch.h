@@ -22,22 +22,7 @@ public:
         size_t len = file.length();
         const char* pattern = keyword.c_str();
 
-        int count = 0;
-        const uint8_t* result;
-        while(len > 0) {
-            result = boyer_moore((const uint8_t*)text, len, (const uint8_t*)pattern, keyword.length());
-            if (result != NULL) {
-                count++;
-                size_t delta =  (size_t)result - (size_t)text;
-                const uint8_t* newText = &result[keyword.length()];
-                text = (const char*)(newText); // Move PAST found string
-                len -= (delta + keyword.length());
-            } else {
-                break;
-            }
-        }
-
-        return count;
+        return boyer_moore((const uint8_t*)text, len, (const uint8_t*)pattern, keyword.length());
     }
 
 private:
@@ -64,12 +49,9 @@ private:
         }
     }
 
-    // true if the suffix of word starting from word[pos] is a prefix
-// of word
+    // true if the suffix of word starting from word[pos] is a prefix of word
     bool is_prefix(const uint8_t* word, size_t wordlen, ptrdiff_t pos) {
         int suffixlen = wordlen - pos;
-        // could also use the strncmp() library function here
-        // return ! strncmp(word, &word[pos], suffixlen);
         for (int i = 0; i < suffixlen; i++) {
             if (word[i] != word[pos + i]) {
                 return false;
@@ -81,11 +63,13 @@ private:
     // length of the longest suffix of word ending on word[pos].
     // suffix_length("dddbcabc", 8, 4) = 2
     size_t suffix_length(const uint8_t* word, size_t wordlen, ptrdiff_t pos) {
-        size_t i;
+        size_t len = 0;
         // increment suffix length i to the first mismatch or beginning
         // of the word
-        for (i = 0; (word[pos - i] == word[wordlen - 1 - i]) && (i <= pos); i++);
-        return i;
+        for (size_t i = pos, j = wordlen - 1; (i >= 0) && (word[i] == word[j]); --i, --j) {
+            len += 1;
+        }
+        return len;
     }
 
     // GOOD-SUFFIX RULE.
@@ -147,7 +131,8 @@ private:
 
     // Returns pointer to first match.
     // See also glibc memmem() (non-BM) and std::boyer_moore_searcher (first-match).
-    const uint8_t* boyer_moore(const uint8_t* string, size_t stringlen, const uint8_t* pat, size_t patlen) {
+    const int boyer_moore(const uint8_t* string, size_t stringlen, const uint8_t* pat, size_t patlen) {
+        int count = 0;
         ptrdiff_t delta1[ALPHABET_LEN];
         ptrdiff_t* delta2 = new ptrdiff_t[patlen]; // C99 VLA
         make_delta1(delta1, pat, patlen);
@@ -155,19 +140,22 @@ private:
 
         // The empty pattern must be considered specially
         if (patlen == 0) {
-            return string;
+            return 0;
         }
 
-        size_t i = patlen - 1;        // str-idx
+        size_t i = patlen - 1; // string index
         while (i < stringlen) {
-            ptrdiff_t j = patlen - 1; // pat-idx
+            ptrdiff_t j = patlen - 1; // pattern index
             while (j >= 0 && (string[i] == pat[j])) {
                 --i;
                 --j;
             }
             if (j < 0) {
-                delete[] delta2;
-                return &string[i + 1];
+                // Found a match! 
+                // move past the string to find the next match
+                count++;
+                i += patlen + 1;
+                continue;
             }
 
             ptrdiff_t shift = std::max(delta1[string[i]], delta2[j]);
@@ -175,6 +163,6 @@ private:
         }
 
         delete[] delta2;
-        return NULL;
+        return count;
     }
 };

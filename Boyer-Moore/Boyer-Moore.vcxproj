@@ -133,6 +133,9 @@
     <Text Include="HuckleberryFinn.txt">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
     </Text>
+    <Text Include="InSearchOfLostTime.txt">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BoyerMooreSearch.h" />

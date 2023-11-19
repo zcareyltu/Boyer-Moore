@@ -13,7 +13,7 @@ public:
         for (int i = 0; i < file.size(); i++) {
             bool found = true;
             for (int j = 0; j < keyword.size(); j++) {
-                if (!checkCase(file[i + j], keyword[j])) {
+                if (file[i + j] != keyword[j]) {
                     found = false;
                     break;
                 }
