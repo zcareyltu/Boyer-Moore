@@ -11,6 +11,8 @@
 //#define TEXT_FILE "InSearchOfLostTime.txt"
 #define TEXT_FILE "ExtraLargeText.txt"
 
+#define SAMPLES 50
+
 #include "StringSearchAlgorithm.h"
 #include "SimpleSearch.h"
 #include "BoyerMooreSearch.h"
@@ -31,13 +33,24 @@ void Benchmark(const char* file, size_t length, const std::string& keyword, Stri
     const uint8_t* text = (const uint8_t*)file;
     const uint8_t* pattern = (const uint8_t*)keyword.c_str();
 
-    auto start = std::chrono::high_resolution_clock::now();
-    int count = algorithm->search(text, length, pattern, keyword.length());
-    auto diff = std::chrono::high_resolution_clock::now() - start;
+    
     
     std::cout << "Algorithm: " << algorithm->getName() << std::endl;
+
+    double totalMS = 0.0;
+    int count;
+    for (int i = 0; i < SAMPLES; i++) {
+        auto start = std::chrono::high_resolution_clock::now();
+        count = algorithm->search(text, length, pattern, keyword.length());
+        auto diff = std::chrono::high_resolution_clock::now() - start;
+
+        double ms = std::chrono::duration<double, std::milli>(diff).count();
+        totalMS += ms;
+        std::cout << ms << std::endl; // Dont print anything else so it's easier to copy into excel
+    }
+
     std::cout << "Found \'" << keyword << "\' " << count << " times." << std::endl;
-    std::cout << "Execution time: " << std::chrono::duration<double, std::milli>(diff).count() << " ms" << std::endl;
+    std::cout << "Average execution time: " << (totalMS / SAMPLES) << " ms" << std::endl;
     std::cout << std::endl;
 
     delete algorithm;
