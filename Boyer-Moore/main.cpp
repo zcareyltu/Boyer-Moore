@@ -4,31 +4,36 @@
 #include <streambuf>
 #include <chrono>
 
-#define KEYWORD "the"
+//#define KEYWORD "the"
+#define KEYWORD "Alice was beginning to get very tired of sitting by her sister"
+
 //#define TEXT_FILE "HuckleberryFinn.txt"
-#define TEXT_FILE "InSearchOfLostTime.txt"
+//#define TEXT_FILE "InSearchOfLostTime.txt"
+#define TEXT_FILE "ExtraLargeText.txt"
 
 #include "StringSearchAlgorithm.h"
 #include "SimpleSearch.h"
 #include "BoyerMooreSearch.h"
 
-bool OpenFile(std::string& textResult) {
-    std::ifstream file(TEXT_FILE);
-    file.seekg(0, std::ios::end);
-    size_t size = file.tellg();
-    textResult = std::string(size, 0);
-    file.seekg(0);
-    file.read(&textResult[0], size);
-    return true;
+char* OpenFile(size_t& length) {
+    std::ifstream file(TEXT_FILE, std::ios::binary | std::ios::ate);
+    length = file.tellg();
+    file.seekg(0, std::ios::beg);
+    char* text = new char[length];
+    if (!file.read(text, length)) {
+        delete[] text;
+        return nullptr;
+    }
+    return text;
 }
 
-void Benchmark(const std::string& file, const std::string& keyword, StringSearchAlgorithm* algorithm) {
-    const uint8_t* text = (const uint8_t*)file.c_str();
+void Benchmark(const char* file, size_t length, const std::string& keyword, StringSearchAlgorithm* algorithm) {
+    const uint8_t* text = (const uint8_t*)file;
     const uint8_t* pattern = (const uint8_t*)keyword.c_str();
 
-    auto start = std::chrono::steady_clock::now();
-    int count = algorithm->search(text, file.length(), pattern, keyword.length());
-    auto diff = std::chrono::steady_clock::now() - start;
+    auto start = std::chrono::high_resolution_clock::now();
+    int count = algorithm->search(text, length, pattern, keyword.length());
+    auto diff = std::chrono::high_resolution_clock::now() - start;
     
     std::cout << "Algorithm: " << algorithm->getName() << std::endl;
     std::cout << "Found \'" << keyword << "\' " << count << " times." << std::endl;
@@ -41,14 +46,16 @@ void Benchmark(const std::string& file, const std::string& keyword, StringSearch
 int main()
 {
     std::string keyword = KEYWORD;
-    std::string file;
-    if (!OpenFile(file)) {
+    char* file;
+    size_t length;
+    if ((file = OpenFile(length)) == nullptr) {
         std::cout << "Unable to open file." << std::endl;
         return 0;
     }
 
-    Benchmark(file, keyword, new SimpleSearch());
-    Benchmark(file, keyword, new BoyerMooreSearch());
+    Benchmark(file, length, keyword, new SimpleSearch());
+    Benchmark(file, length, keyword, new BoyerMooreSearch());
+    delete[] file;
 
     return 0;
 }

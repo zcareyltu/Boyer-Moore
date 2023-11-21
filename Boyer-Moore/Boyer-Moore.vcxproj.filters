@@ -22,6 +22,7 @@
   <ItemGroup>
     <Text Include="HuckleberryFinn.txt" />
     <Text Include="InSearchOfLostTime.txt" />
+    <Text Include="ExtraLargeText.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="StringSearchAlgorithm.h">
