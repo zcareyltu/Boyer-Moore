@@ -5,6 +5,7 @@
 #include <chrono>
 
 //#define KEYWORD "the"
+//#define KEYWORD "Alice was beginning to get"
 #define KEYWORD "Alice was beginning to get very tired of sitting by her sister"
 
 //#define TEXT_FILE "HuckleberryFinn.txt"
@@ -31,26 +32,30 @@ char* OpenFile(size_t& length) {
 
 void Benchmark(const char* file, size_t length, const std::string& keyword, StringSearchAlgorithm* algorithm) {
     const uint8_t* text = (const uint8_t*)file;
-    const uint8_t* pattern = (const uint8_t*)keyword.c_str();
-
-    
-    
     std::cout << "Algorithm: " << algorithm->getName() << std::endl;
-
-    double totalMS = 0.0;
     int count;
-    for (int i = 0; i < SAMPLES; i++) {
-        auto start = std::chrono::high_resolution_clock::now();
-        count = algorithm->search(text, length, pattern, keyword.length());
-        auto diff = std::chrono::high_resolution_clock::now() - start;
 
-        double ms = std::chrono::duration<double, std::milli>(diff).count();
-        totalMS += ms;
-        std::cout << ms << std::endl; // Dont print anything else so it's easier to copy into excel
+    //Test the algorith for every length of the keyword
+    for (int i = 1; i <= keyword.length(); i++) {
+        std::string pattern = keyword.substr(0, i);
+
+        double totalMS = 0.0;
+        for (int i = 0; i < SAMPLES; i++) {
+            auto start = std::chrono::high_resolution_clock::now();
+            count = algorithm->search(text, length, (const uint8_t*)pattern.c_str(), pattern.length());
+            auto diff = std::chrono::high_resolution_clock::now() - start;
+
+            double ms = std::chrono::duration<double, std::milli>(diff).count();
+            totalMS += ms;
+            
+        }
+
+        std::cout << (totalMS / SAMPLES) << std::endl; // Dont print anything else so it's easier to copy into excel
     }
 
+
+
     std::cout << "Found \'" << keyword << "\' " << count << " times." << std::endl;
-    std::cout << "Average execution time: " << (totalMS / SAMPLES) << " ms" << std::endl;
     std::cout << std::endl;
 
     delete algorithm;
@@ -65,6 +70,10 @@ int main()
         std::cout << "Unable to open file." << std::endl;
         return 0;
     }
+
+    //length /= 10;
+    //length *= 1;
+    std::cout << "Length: " << length << std::endl;
 
     Benchmark(file, length, keyword, new SimpleSearch());
     Benchmark(file, length, keyword, new BoyerMooreSearch());
