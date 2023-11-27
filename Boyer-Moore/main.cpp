@@ -4,7 +4,6 @@
 #include <streambuf>
 #include <chrono>
 
-//#define KEYWORD "the"
 #define KEYWORD "Alice was beginning to get very tired of sitting by her sister"
 
 //#define TEXT_FILE "HuckleberryFinn.txt"
@@ -36,7 +35,7 @@ void Benchmark(const char* file, size_t length, const std::string& keyword, Stri
     auto diff = std::chrono::high_resolution_clock::now() - start;
     
     std::cout << "Algorithm: " << algorithm->getName() << std::endl;
-    std::cout << "Found \'" << keyword << "\' " << count << " times." << std::endl;
+    std::cout << "Found the pattern " << count << " times." << std::endl;
     std::cout << "Execution time: " << std::chrono::duration<double, std::milli>(diff).count() << " ms" << std::endl;
     std::cout << std::endl;
 
@@ -45,7 +44,6 @@ void Benchmark(const char* file, size_t length, const std::string& keyword, Stri
 
 int main()
 {
-    std::string keyword = KEYWORD;
     char* file;
     size_t length;
     if ((file = OpenFile(length)) == nullptr) {
@@ -53,8 +51,23 @@ int main()
         return 0;
     }
 
-    Benchmark(file, length, keyword, new SimpleSearch());
-    Benchmark(file, length, keyword, new BoyerMooreSearch());
+    std::string pattern;
+    while (true) {
+        std::cout << "Enter the pattern to search for (blank for default): ";
+        //std::cin >> pattern;
+        std::getline(std::cin, pattern);
+        if (pattern.empty()) {
+            pattern = KEYWORD;
+        }
+        std::cout << "Searching for pattern \'" << pattern << "\'." << std::endl << std::endl;
+
+        Benchmark(file, length, pattern, new SimpleSearch());
+        Benchmark(file, length, pattern, new BoyerMooreSearch());
+
+        std::cout << "----------------------------------------------" << std::endl;
+        std::cout << std::endl;
+    }
+
     delete[] file;
 
     return 0;
