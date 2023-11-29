@@ -21,8 +21,8 @@ public:
         int count = 0;
         ptrdiff_t delta1[ALPHABET_LEN];
         ptrdiff_t* delta2 = new ptrdiff_t[keyword_len]; 
-        make_delta1(delta1, keyword, keyword_len);
-        make_delta2(delta2, keyword, keyword_len);
+        make_bad_character_rule(delta1, keyword, keyword_len);
+        make_good_suffix_rule(delta2, keyword, keyword_len);
 
         // The empty pattern must be considered specially
         if (keyword_len == 0) {
@@ -54,7 +54,7 @@ public:
 
 private:
     // Bad-character rule
-    void make_delta1(ptrdiff_t* delta1, const uint8_t* pat, size_t patlen) {
+    void make_bad_character_rule(ptrdiff_t* delta1, const uint8_t* pat, size_t patlen) {
         for (int i = 0; i < ALPHABET_LEN; i++) {
             delta1[i] = patlen;
         }
@@ -64,7 +64,7 @@ private:
     }
 
     // Good-suffix rule
-    void make_delta2(ptrdiff_t* delta2, const uint8_t* pat, size_t patlen) {
+    void make_good_suffix_rule(ptrdiff_t* delta2, const uint8_t* pat, size_t patlen) {
         long long p;
         size_t last_prefix_index = 1;
 
